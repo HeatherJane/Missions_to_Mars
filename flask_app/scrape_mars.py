@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Jun 23 13:08:27 2020
-#################################################
-# Jupyter Notebook Conversion to Python Script
-#################################################
-
+#Created on Tue Jun 23 13:08:27 2020
 # Dependencies and Setup
 from bs4 import BeautifulSoup
 from splinter import Browser
@@ -13,16 +8,10 @@ import pandas as pd
 import datetime as dt
 
 #################################################
-# Mac
-#################################################
 # Set Executable Path & Initialize Chrome Browser
 executable_path = {"executable_path": "/usr/local/bin/chromedriver"}
 browser = Browser("chrome", **executable_path, headless=False)
 
-
-
-#################################################
-# NASA Mars News
 #################################################
 # NASA Mars News Site Web Scraper
 def mars_news(browser):
@@ -53,9 +42,6 @@ def mars_news(browser):
         return None, None
     return news_title, news_paragraph
 
-
-#################################################
-# JPL Mars Space Images - Featured Image
 #################################################
 # NASA JPL (Jet Propulsion Laboratory) Site Web Scraper
 def featured_image(browser):
@@ -86,9 +72,6 @@ def featured_image(browser):
     img_url = f"https://www.jpl.nasa.gov{img_url}"
     return img_url
 
-
-#################################################
-# Mars Weather
 #################################################
 # Mars Weather Twitter Account Web Scraper
 def twitter_weather(browser):
@@ -101,18 +84,15 @@ def twitter_weather(browser):
     weather_soup = BeautifulSoup(html, "html.parser")
     
     # Find a Tweet with the data-name `Mars Weather`
-    mars_weather_tweet = weather_soup.find("div", 
-                                       attrs={
-                                           "class": "tweet", 
-                                            "data-name": "Mars Weather"
-                                        })
-   # Search Within Tweet for <p> Tag Containing Tweet Text
-    mars_weather = mars_weather_tweet.find("p", "tweet-text").get_text()
-    return mars_weather
+    mars_weather_tweet = weather_soup.find_all('article',class_= 'css-1dbjc4n r-1loqt21 r-16y2uox r-1wbh5a2 r-1ny4l3l r-1udh08x r-1j3t67a r-o7ynqc r-6416eg')
+  
+    # Search Within Tweet for <p> Tag Containing Tweet Text
+    weather = mars_weather_tweet[0].find_all('div', class_='css-901oao r-hkyrab r-1qd0xha r-a023e6 r-16dba41 r-ad9z0x r-bcqeeo r-bnwqim r-qvutc0')
+    for w in weather:  
+        weather_text = w.find('span', class_='css-901oao css-16my406 r-1qd0xha r-ad9z0x r-bcqeeo r-qvutc0').text
+    print("Weather Text: " + weather_text)
+    return weather_text
 
-
-#################################################
-# Mars Facts
 #################################################
 # Mars Facts Web Scraper
 def mars_facts():
@@ -124,11 +104,8 @@ def mars_facts():
     df.columns=["Description", "Value"]
     df.set_index("Description", inplace=True)
 
-    return df.to_html(classes="table table-striped")
+    return df.to_html(classes="table table-dark")
 
-
-#################################################
-# Mars Hemispheres
 #################################################
 # Mars Hemispheres Web Scraper
 def hemisphere(browser):
@@ -178,13 +155,12 @@ def scrape_hemisphere(html_text):
 
 #################################################
 # Main Web Scraping Bot
-#################################################
 def scrape_all():
     executable_path = {"executable_path": "/usr/local/bin/chromedriver"}
-    browser = Browser("chrome", **executable_path, headless=False)
+    browser = Browser("chrome", **executable_path, headless=True)
     news_title, news_paragraph = mars_news(browser)
     img_url = featured_image(browser)
-    mars_weather = twitter_weather(browser)
+    weather_text = twitter_weather(browser)
     facts = mars_facts()
     hemisphere_image_urls = hemisphere(browser)
     timestamp = dt.datetime.now()
@@ -193,7 +169,7 @@ def scrape_all():
         "news_title": news_title,
         "news_paragraph": news_paragraph,
         "featured_image": img_url,
-        "weather": mars_weather,
+        "weather": weather_text,
         "facts": facts,
         "hemispheres": hemisphere_image_urls,
         "last_modified": timestamp
@@ -203,7 +179,3 @@ def scrape_all():
 
 if __name__ == "__main__":
     print(scrape_all())
-    
-@author: heatherjanemoore
-"""
-
